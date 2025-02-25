@@ -23,15 +23,19 @@ document.addEventListener('DOMContentLoaded', async function() {
   const loader = document.querySelector('.loader');
   const errorMsg = document.getElementById('error-msg');
   const progressBar = document.querySelector('.progress-bar');
+  const controls = document.querySelector('.controls');
   
   let pages = [];
   let currentPageIndex = 0;
   let totalPages = 0;
   let titles = [];
   
-  // Toggle table of contents
+  // Toggle table of contents (now defaults to showing)
   tocToggle.addEventListener('click', function() {
-    toc.classList.toggle('visible');
+    toc.classList.toggle('hidden');
+    tocToggle.classList.toggle('closed');
+    bookContainer.classList.toggle('full-width');
+    controls.classList.toggle('shifted');
   });
   
   // Toggle dark/light mode
@@ -149,43 +153,48 @@ document.addEventListener('DOMContentLoaded', async function() {
       pageContent.innerHTML = `<h1>Error Parsing Page ${pageNumber}</h1><p>There was an error rendering this page.</p>`;
     }
     
-    // Add page corner for turning effect
-    const pageCorner = document.createElement('div');
-    pageCorner.className = 'page-corner';
-    pageCorner.addEventListener('click', goToNextPage);
-    
     pageFront.appendChild(pageContent);
-    pageFront.appendChild(pageCorner);
     pageWrapper.appendChild(pageFront);
     
     return pageWrapper;
   }
 
-  // Function to go to a specific page
+  // Function to go to a specific page with simple transition
   function goToPage(index) {
     if (index < 0 || index >= pages.length) return;
     
-    // Hide all pages
-    pages.forEach(page => {
-      page.classList.remove('active');
-      page.classList.remove('flipped');
-    });
+    // Prevent any ongoing animations
+    document.body.classList.add('changing-page');
     
-    // Show the target page
-    pages[index].classList.add('active');
-    
-    // Flip previous pages
-    for (let i = 0; i < index; i++) {
-      pages[i].classList.add('flipped');
-    }
-    
-    currentPageIndex = index;
-    updatePageIndicator();
-    updateProgressBar();
-    updateTableOfContents();
-    
-    // Save current page in local storage
-    localStorage.setItem('currentPage', index);
+    // Use setTimeout to ensure CSS transitions work properly
+    setTimeout(() => {
+      // Hide all pages
+      pages.forEach(page => {
+        page.classList.remove('active');
+      });
+      
+      // Show the target page
+      pages[index].classList.add('active');
+      
+      currentPageIndex = index;
+      updatePageIndicator();
+      updateProgressBar();
+      updateTableOfContents();
+      
+      // Save current page in local storage
+      localStorage.setItem('currentPage', index);
+      
+      // Scroll to top when changing pages
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      
+      // Remove the class after animations complete
+      setTimeout(() => {
+        document.body.classList.remove('changing-page');
+      }, 300);
+    }, 10);
   }
 
   // Update the page indicator
@@ -243,6 +252,22 @@ document.addEventListener('DOMContentLoaded', async function() {
       return false;
     }
   }
+
+  // Function to handle page shadow effect on scroll
+  function handlePageShadow() {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const activePage = document.querySelector('.page-wrapper.active .page-front');
+    
+    if (activePage) {
+      // Increase shadow as user scrolls down
+      const shadowOpacity = Math.min(0.3, 0.1 + (scrollTop / 1000));
+      const blurRadius = Math.min(30, 10 + (scrollTop / 50));
+      activePage.style.boxShadow = `0 ${5 + (scrollTop / 100)}px ${blurRadius}px rgba(0, 0, 0, ${shadowOpacity})`;
+    }
+  }
+
+  // Add event listener for scroll to adjust page shadow
+  window.addEventListener('scroll', handlePageShadow);
 
   // Load markdown files and create pages
   async function loadPages() {
@@ -322,9 +347,17 @@ document.addEventListener('DOMContentLoaded', async function() {
       // Restore the last viewed page from local storage or show the first page
       const savedPage = localStorage.getItem('currentPage');
       if (savedPage !== null && !isNaN(savedPage) && parseInt(savedPage) < pages.length) {
-        goToPage(parseInt(savedPage));
+        // Show the saved page without animation on initial load
+        const savedPageIndex = parseInt(savedPage);
+        pages.forEach(page => page.classList.remove('active'));
+        pages[savedPageIndex].classList.add('active');
+        currentPageIndex = savedPageIndex;
+        updatePageIndicator();
+        updateProgressBar();
+        updateTableOfContents();
       } else {
-        goToPage(0);
+        // Show the first page without animation
+        pages[0].classList.add('active');
       }
       
       // Hide loader
@@ -373,6 +406,33 @@ document.addEventListener('DOMContentLoaded', async function() {
       goToNextPage();
     }
   }
+  
+  // Update progress bar based on scroll position
+  window.addEventListener('scroll', function() {
+    // Calculate how far down the page the user has scrolled
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrollPercentage = (scrollTop / scrollHeight) * 100;
+    
+    // Blend the page number with scroll percentage for smoother progress
+    const pageProgress = ((currentPageIndex) / (totalPages - 1)) * 100;
+    const blendedProgress = (pageProgress * 0.7) + (scrollPercentage * 0.3);
+    
+    progressBar.style.width = `${blendedProgress}%`;
+  });
+  
+  // Check if the viewport is narrow enough to hide TOC by default on mobile
+  function checkMobileView() {
+    if (window.innerWidth <= 600) {
+      toc.classList.add('hidden');
+      tocToggle.classList.add('closed');
+      bookContainer.classList.add('full-width');
+    }
+  }
+  
+  // Check on page load and when resizing
+  window.addEventListener('resize', checkMobileView);
+  checkMobileView();
   
   // Start loading pages
   loadPages();
