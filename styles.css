@@ -1,0 +1,430 @@
+:root {
+  --book-color: linear-gradient(135deg, #3a7bd5, #2d3e50);
+  --page-color: #fff;
+  --page-shadow: rgba(0, 0, 0, 0.15);
+  --accent-color: #3a7bd5;
+  --code-bg: #f8f9fa;
+  --highlight-color: #ffdc4e;
+  --text-color: #2d3e50;
+  --link-color: #3a7bd5;
+  --gradient-1: linear-gradient(135deg, #3a7bd5, #2d3e50);
+  --gradient-2: linear-gradient(135deg, #f5576c, #f093fb);
+  --gradient-3: linear-gradient(135deg, #5ee7df, #b490ca);
+  --edge-width: 30px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f2f5;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book-container {
+  position: relative;
+  width: 90vw;
+  height: 85vh;
+  perspective: 2000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.book {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateY(0deg);
+  transition: transform 0.5s ease;
+}
+
+.page-wrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  transform-origin: left center;
+  transition: transform 0.6s cubic-bezier(0.645, 0.045, 0.355, 1);
+  transform-style: preserve-3d;
+  perspective: 2000px;
+}
+
+.page-front, .page-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  padding: 40px var(--edge-width);
+  background: var(--page-color);
+  overflow-y: auto;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  box-shadow: 0 4px 10px var(--page-shadow);
+  border-radius: 5px;
+}
+
+/* Add a subtle grain texture to pages */
+.page-front, .page-back {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000000' fill-opacity='0.02' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  background-color: var(--page-color);
+}
+
+.page-front {
+  transform: rotateY(0deg);
+  z-index: 1;
+}
+
+.page-back {
+  transform: rotateY(180deg);
+  z-index: 0;
+}
+
+/* Book spine and edges */
+.book::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--edge-width);
+  height: 100%;
+  background: var(--book-color);
+  transform: translateX(-15px) rotateY(90deg);
+  transform-origin: left;
+  border-radius: 5px 0 0 5px;
+  box-shadow: inset -5px 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.book::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  background: #ddd;
+  transform: translateX(5px) rotateY(90deg);
+  transform-origin: right;
+}
+
+/* Page edge styling for realistic book look */
+.page-front::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to right, rgba(0,0,0,0.05), rgba(0,0,0,0.01));
+  border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+.page-back::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(to left, rgba(0,0,0,0.05), rgba(0,0,0,0.01));
+  border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+/* Page content styling */
+.page-content {
+  line-height: 1.6;
+  color: var(--text-color);
+  padding-bottom: 40px;
+}
+
+/* Generate page numbers */
+.page-content::after {
+  content: attr(data-page);
+  position: absolute;
+  bottom: 20px;
+  right: 40px;
+  font-size: 0.9rem;
+  color: #999;
+  font-style: italic;
+}
+
+.flipped {
+  transform: rotateY(-180deg);
+}
+
+.controls {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 1rem;
+  z-index: 100;
+}
+
+.nav-btn {
+  background: var(--accent-color);
+  border: none;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.nav-btn:hover {
+  background: #2980b9;
+  transform: scale(1.05);
+}
+
+.page-indicator {
+  color: white;
+  background: var(--accent-color);
+  border-radius: 20px;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Table of contents styling */
+.toc {
+  position: absolute;
+  left: 30px;
+  top: 30px;
+  width: 300px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 20px;
+  z-index: 1000;
+  transform: translateX(-350px);
+  transition: transform 0.3s ease;
+}
+
+.toc.visible {
+  transform: translateX(0);
+}
+
+.toc-toggle {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  z-index: 1001;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.toc-toggle:hover {
+  background: #2980b9;
+  transform: scale(1.05);
+}
+
+.toc h3 {
+  margin-bottom: 15px;
+  color: var(--accent-color);
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.toc-links {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.toc-link {
+  display: block;
+  padding: 8px 0;
+  color: var(--text-color);
+  text-decoration: none;
+  border-bottom: 1px solid #eee;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.toc-link:hover {
+  color: var(--accent-color);
+  padding-left: 5px;
+}
+
+.toc-link.active {
+  color: var(--accent-color);
+  font-weight: bold;
+}
+
+/* Gorgeous headings with gradients */
+.page-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--accent-color);
+  position: relative;
+  display: inline-block;
+}
+
+.page-content h1::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--gradient-1);
+  border-radius: 5px;
+}
+
+.page-content h2 {
+  font-size: 2rem;
+  margin: 2rem 0 1rem;
+  color: var(--accent-color);
+}
+
+.page-content h3 {
+  font-size: 1.5rem;
+  margin: 1.5rem 0 0.8rem;
+  color: var(--text-color);
+}
+
+.page-content p {
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.page-content ul, .page-content ol {
+  margin: 1rem 0 1.5rem 2rem;
+}
+
+.page-content li {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Beautiful code blocks */
+.page-content pre {
+  background: var(--code-bg);
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  border-left: 5px solid var(--accent-color);
+  font-size: 1rem;
+  box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Inline code styling */
+.page-content code:not(pre code) {
+  background: var(--code-bg);
+  padding: 2px 5px;
+  border-radius: 4px;
+  color: var(--accent-color);
+  font-size: 0.9em;
+}
+
+/* Stunning notes and callouts */
+.note, .warning, .tip {
+  padding: 15px 20px 15px 60px;
+  margin: 1.5rem 0;
+  border-radius: 10px;
+  position: relative;
+}
+
+.note::before, .warning::before, .tip::before {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.note {
+  background: rgba(58, 123, 213, 0.1);
+  border-left: 5px solid var(--accent-color);
+}
+
+.note::before {
+  content: "📝";
+}
+
+.warning {
+  background: rgba(241, 196, 15, 0.1);
+  border-left: 5px solid #f1c40f;
+}
+
+.warning::before {
+  content: "⚠️";
+}
+
+.tip {
+  background: rgba(46, 204, 113, 0.1);
+  border-left: 5px solid #2ecc71;
+}
+
+.tip::before {
+  content: "💡";
+}
+
+/* Logo for cover */
+.book-logo {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a7bd5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'%3E%3C/path%3E%3Cpath d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'%3E%3C/path%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* Loading indicator */
+.loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+}
+
+.loader.hidden {
+  display: none;
+}
+
+.loader-spinner {
+  position: relative;
+  width: 100px;
+  height: 100px;
+}
+
+.loader-spinner::before,
+.loader-spinner::after {
+  content: '';
