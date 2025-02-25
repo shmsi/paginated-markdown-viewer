@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Book Viewer</title>
+  <!-- Load highlight.js for code syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/nord.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/languages/bash.min.js"></script>
+  <!-- Load marked.js for markdown parsing -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.2.5/marked.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="progress-bar"></div>
+
+  <div class="loader">
+    <div class="loader-spinner"></div>
+  </div>
+
+  <button class="toc-toggle" id="toc-toggle">≡</button>
+  <button class="theme-toggle" id="theme-toggle">☀</button>
+
+  <div class="toc" id="toc">
+    <h3>Table of Contents</h3>
+    <div class="toc-links" id="toc-links"></div>
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+  
+  <div class="book-container" id="book-container">
+    <div class="book" id="book"></div>
+  </div>
+
+  <div class="controls">
+    <button class="nav-btn prev-btn" id="prev-btn">&larr;</button>
+    <div class="page-indicator" id="page-indicator">Page 1 / 1</div>
+    <button class="nav-btn next-btn" id="next-btn">&rarr;</button>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
