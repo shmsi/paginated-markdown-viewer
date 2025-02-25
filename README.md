@@ -2,8 +2,6 @@
 
 A beautiful, interactive digital book viewer that automatically loads sequentially numbered markdown files. Simply create your markdown content files with numeric names (1.md, 2.md, 3.md, etc.) and the viewer will display them as an elegant book.
 
-![Markdown Book Viewer](https://via.placeholder.com/800x400/3a7bd5/ffffff?text=Markdown+Book+Viewer)
-
 ## Features
 
 - Beautiful book-like interface with realistic page-turning effects
